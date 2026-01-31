@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แม่อ้อพารวย 8 ช่อง</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: "Kanit", "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .container {
+    background: rgba(255, 255, 255, 0.95);
+    max-width: 500px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #667eea;
+    font-size: 32px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: #e53935;
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-size: 14px;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .stat-box {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+  }
+  
+  .stat-box.owner {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+  
+  .stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 5px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .round-counter {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+  }
+  
+  .round-counter span {
+    color: #764ba2;
+    font-size: 20px;
+  }
+  
+  .wheel-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 30px auto;
+  }
+  
+  .wheel-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #e53935;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  
+  .wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    border: 8px solid #fff;
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  }
+  
+  canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+  
+  .wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  
+  .spin-button {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    font-size: 20px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .spin-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+  
+  .spin-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    min-height: 80px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  .result b {
+    color: #667eea;
+  }
+  
+  .prizes {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+  
+  .prizes-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #856404;
+  }
+  
+  .prize-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+  }
+  
+  /* Fireworks Animation */
+  .firework {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  
+  @keyframes explode {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--tx), var(--ty)) scale(0);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎡 แม่อ้อพารวย</h1>
+  <div class="subtitle">💥 แจ็กพอตแตกบ่อย! เจ้าของเกมขาดทุนหนัก!</div>
+  
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-label">💰 เงินของคุณ</div>
+      <div class="stat-value"><span id="playerMoney">300</span> ฿</div>
+    </div>
+    <div class="stat-box owner">
+      <div class="stat-label">😱 กำไร/ขาดทุนเจ้าของ</div>
+      <div class="stat-value"><span id="ownerLoss">0</span> ฿</div>
+    </div>
+  </div>
+  
+  <div class="round-counter">
+    🎰 รอบที่: <span id="roundNumber">0</span>
+  </div>
+  
+  <div class="wheel-container">
+    <div class="wheel-pointer"></div>
+    <div class="wheel" id="wheel">
+      <canvas id="wheelCanvas" width="600" height="600"></canvas>
+      <div class="wheel-center">🎰</div>
+    </div>
+  </div>
+  
+  <button class="spin-button" id="spinBtn" onclick="spin()">
+    🎰 หมุนวงล้อ 50 บาท
+  </button>
+  
+  <div class="result" id="result">
+    คลิกปุ่มด้านบนเพื่อเริ่มเล่น!
+  </div>
+  
+  <div class="prizes">
+    <div class="prizes-title">🏆 รางวัล:</div>
+    <div class="prize-list">
+      <div>เลข 2 = 20฿</div>
+      <div>เลข 4 = 30฿</div>
+      <div>เลข 6 = 40฿</div>
+      <div>เลข 8 = 200฿ 🎉</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// วาดวงล้อ
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const segments = 8;
+const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#FFD93D'];
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = canvas.width / 2;
+
+function drawWheel() {
+  const anglePerSegment = (2 * Math.PI) / segments;
+  
+  for (let i = 0; i < segments; i++) {
+    const startAngle = i * anglePerSegment - Math.PI / 2;
+    const endAngle = startAngle + anglePerSegment;
+    
+    // วาดส่วนของวงล้อ
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    
+    // วาดเส้นขอบ
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // วาดตัวเลข
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(startAngle + anglePerSegment / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px Arial';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(i + 1, radius * 0.65, 0);
+    ctx.restore();
+  }
+}
+
+drawWheel();
+
+// ฟังก์ชันเล่นเสียงพลุ
+function playFireworkSound() {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // เสียงระเบิด 1
+  const explosion1 = () => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+  
+  // เล่นเสียงพลุหลายครั้ง
+  explosion1();
+  setTimeout(explosion1, 300);
+  setTimeout(explosion1, 600);
+  setTimeout(explosion1, 900);
+}
+
+// ฟังก์ชันเล่นเสียงกรี๊ด
+function playCheerSound() {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // เสียงกรี๊ด 1
+  const cheer1 = () => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.2);
+    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.4);
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+  
+  // เล่นเสียงกรี๊ดหลายครั้ง
+  cheer1();
+  setTimeout(cheer1, 200);
+  setTimeout(cheer1, 400);
+}
+
+// ฟังก์ชันสร้างพลุ
+function createFirework(x, y) {
+  const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#FFE66D', '#AA96DA', '#00ff00', '#ff00ff'];
+  const particles = 35;
+  
+  for (let i = 0; i < particles; i++) {
+    const firework = document.createElement('div');
+    firework.className = 'firework';
+    firework.style.left = x + 'px';
+    firework.style.top = y + 'px';
+    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    const angle = (Math.PI * 2 * i) / particles;
+    const velocity = 80 + Math.random() * 120;
+    const tx = Math.cos(angle) * velocity;
+    const ty = Math.sin(angle) * velocity;
+    
+    firework.style.setProperty('--tx', tx + 'px');
+    firework.style.setProperty('--ty', ty + 'px');
+    firework.style.animation = `explode ${0.8 + Math.random() * 0.4}s ease-out forwards`;
+    
+    document.body.appendChild(firework);
+    
+    setTimeout(() => firework.remove(), 1500);
+  }
+}
+
+// ฟังก์ชันจัดงานฉลองแจ็กพอต 🎉
+function celebrateJackpot() {
+  // เล่นเสียงกรี๊ด
+  playCheerSound();
+  
+  // เล่นเสียงพลุ
+  setTimeout(() => playFireworkSound(), 100);
+  
+  // ยิงพลุหลายจุด
+  const fireworkPositions = [
+    { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+    { x: window.innerWidth * 0.5, y: window.innerHeight * 0.25 },
+    { x: window.innerWidth * 0.8, y: window.innerHeight * 0.35 },
+    { x: window.innerWidth * 0.35, y: window.innerHeight * 0.6 },
+    { x: window.innerWidth * 0.65, y: window.innerHeight * 0.55 },
+  ];
+  
+  // ยิงพลุรอบแรก
+  fireworkPositions.forEach((pos, index) => {
+    setTimeout(() => createFirework(pos.x, pos.y), index * 250);
+  });
+  
+  // ยิงพลุรอบสอง
+  setTimeout(() => {
+    fireworkPositions.forEach((pos, index) => {
+      setTimeout(() => createFirework(pos.x, pos.y), index * 200);
+    });
+  }, 1300);
+  
+  // ยิงพลุรอบสาม
+  setTimeout(() => {
+    fireworkPositions.forEach((pos, index) => {
+      setTimeout(() => createFirework(pos.x, pos.y), index * 180);
+    });
+  }, 2400);
+}
+
+let playerMoney = 300;
+let ownerMoney = 0;
+let round = 0;
+let isSpinning = false;
+
+function spin() {
+  if (isSpinning) return;
+  
+  const result = document.getElementById("result");
+  const spinBtn = document.getElementById("spinBtn");
+  const wheel = document.getElementById("wheel");
+  
+  if (playerMoney < 50) {
+    result.innerHTML = `
+      ❌ เงินของคุณไม่พอ!<br>
+      <small>คุณต้องมีเงินอย่างน้อย 50 บาทในการเล่น</small>
+    `;
+    return;
+  }
+  
+  isSpinning = true;
+  spinBtn.disabled = true;
+  round++;
+  playerMoney -= 50;
+  ownerMoney += 50;
+  
+  // กำหนดเลขที่จะออก
+  let number;
+  if (round <= 5 && Math.random() < 0.45) {
+    number = 8;
+  } else {
+    number = Math.floor(Math.random() * 8) + 1;
+  }
+  
+  // คำนวณรางวัล
+  let reward = 0;
+  if (number === 2) reward = 20;
+  if (number === 4) reward = 30;
+  if (number === 6) reward = 40;
+  if (number === 8) reward = 200;
+  
+  // คำนวณมุมหมุน (หมุนหลายรอบ + มุมของเลขที่ต้องการ)
+  const segmentAngle = 360 / 8;
+  const targetAngle = (8 - number) * segmentAngle + (segmentAngle / 2);
+  const spins = 5; // จำนวนรอบที่หมุน
+  const totalRotation = (360 * spins) + targetAngle;
+  
+  result.innerHTML = `
+    🎰 กำลังหมุนวงล้อ...<br>
+    <small>รอสักครู่...</small>
+  `;
+  
+  // หมุนวงล้อ
+  wheel.style.transform = `rotate(${totalRotation}deg)`;
+  
+  // รอให้วงล้อหมุนเสร็จ
+  setTimeout(() => {
+    playerMoney += reward;
+    ownerMoney -= reward;
+    
+    // อัพเดทรอบที่เล่น
+    document.getElementById("roundNumber").innerText = round;
+    
+    // คำนวณกำไร/ขาดทุนของเจ้าของ
+    let ownerProfit = ownerMoney;
+    let displayText = '';
+    
+    if (ownerProfit < 0) {
+      // เจ้าของขาดทุน - แสดงเครื่องหมายลบ
+      displayText = ownerProfit; // จะมี - อยู่แล้ว
+    } else {
+      // เจ้าของได้กำไร - ไม่ต้องมีเครื่องหมาย
+      displayText = ownerProfit;
+    }
+    
+    document.getElementById("playerMoney").innerText = playerMoney;
+    document.getElementById("ownerLoss").innerText = displayText;
+    
+    let rewardText = reward > 0 
+      ? `💰 คุณได้รับ <b>${reward} บาท</b>` 
+      : `ไม่ได้รางวัล`;
+    
+    let ownerText = '';
+    if (ownerProfit < 0) {
+      ownerText = `😱 เจ้าของเกมขาดทุน ${Math.abs(ownerProfit)} บาท!`;
+    } else if (ownerProfit > 0) {
+      ownerText = `😏 เจ้าของเกมได้กำไรแล้ว ${ownerProfit} บาท!`;
+    } else {
+      ownerText = `😐 เจ้าของเกมพอดีไม่ได้ไม่เสีย`;
+    }
+    
+    // 🎉🎊 ฉลองถ้าได้แจ็กพอต!
+    if (number === 8) {
+      celebrateJackpot();
+    }
+    
+    result.innerHTML = `
+      🎯 วงล้อหยุดที่เลข <b>${number}</b><br>
+      ${rewardText}<br>
+      <small>${ownerText}</small>
+    `;
+    
+    // รีเซ็ตมุมหมุนเพื่อเตรียมรอบถัดไป
+    wheel.style.transition = 'none';
+    wheel.style.transform = `rotate(${targetAngle}deg)`;
+    setTimeout(() => {
+      wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+    }, 50);
+    
+    isSpinning = false;
+    spinBtn.disabled = false;
+    
+    // ตรวจสอบเงินหมด
+    if (playerMoney < 50) {
+      result.innerHTML += `<br><br>⚠️ <b>เงินของคุณไม่พอเล่นต่อ!</b>`;
+    }
+  }, 4000);
+}
+</script>
+</body>
+</html>
